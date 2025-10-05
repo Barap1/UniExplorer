@@ -239,16 +239,20 @@ function App() {
 
       snapshot.forEach((doc) => {
         const data = doc.data()
-        const annotation = {
+        if (!data) {
+          return
+        }
+
+        const annotation: Annotation = {
           id: doc.id,
           lat: data.lat,
           lng: data.lng,
-          text: data.text,
-          author: data.author,
-          celestialBody: data.celestialBody,
-        } as Annotation
+          text: data.text ?? 'Unnamed discovery',
+          author: data.author ?? 'Explorer',
+          celestialBody: data.celestialBody ?? activeBody.name,
+        }
 
-        if (typeof annotation.lat !== 'number' || typeof annotation.lng !== 'number') {
+        if (annotation.celestialBody !== activeBody.name) {
           return
         }
 

@@ -15,7 +15,7 @@ import {
 
 type LeafletModule = typeof import('leaflet')
 
-type CelestialBodyKey = 'mars' | 'ceres'
+type CelestialBodyKey = 'mars' | 'moon' | 'mercury'
 
 interface CelestialBody {
   name: string
@@ -42,24 +42,26 @@ interface ToastMessage {
   type: ToastType
 }
 
-const toastClasses: Record<ToastType, string> = {
-  info: 'bg-slate-900/90 border border-slate-500 text-white',
-  error: 'bg-red-600/90 border border-red-300 text-white',
-}
-
 const celestialBodies: Record<CelestialBodyKey, CelestialBody> = {
   mars: {
     name: 'Mars',
-    baseUrl: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/mars/mars_simp_cyl.map',
-    layerName: 'MDIM21_color',
-    attribution: 'USGS Astrogeology Science Center | Viking MDIM 2.1',
+    baseUrl: 'https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-mars-basemap-v0-2/all/{z}/{x}/{y}.png',
+    layerName: '',
+    attribution: 'Mars basemap | USGS Astrogeology',
     maxZoom: 7,
   },
-  ceres: {
-    name: 'Ceres',
-    baseUrl: '[https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/ceres/ceres_simp_cyl.map](https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/ceres/ceres_simp_cyl.map)',
-    layerName: 'Dawn_FC_HAMO_ClrShade_Global',
-    attribution: 'USGS Astrogeology Science Center | NASA Dawn',
+  moon: {
+    name: 'Moon',
+    baseUrl: 'https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.png',
+    layerName: '',
+    attribution: 'Moon basemap | USGS Astrogeology',
+    maxZoom: 7,
+  },
+  mercury: {
+    name: 'Mercury',
+    baseUrl: 'https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-mercury-basemap-v0-1/all/{z}/{x}/{y}.png',
+    layerName: '',
+    attribution: 'Mercury basemap | USGS Astrogeology',
     maxZoom: 7,
   },
 }
@@ -110,9 +112,7 @@ function App() {
       return
     }
 
-    if (container.hasChildNodes()) {
-      container.replaceChildren()
-    }
+    container.replaceChildren()
 
     delete (L.Icon.Default.prototype as any)._getIconUrl
     L.Icon.Default.mergeOptions({
@@ -142,19 +142,20 @@ function App() {
 
     const markers: L.Marker[] = []
 
-    const wmsLayer = L.tileLayer.wms(activeBody.baseUrl, {
-      layers: activeBody.layerName,
-      format: 'image/jpeg',
-      transparent: false,
+    const tileLayer = L.tileLayer(activeBody.baseUrl, {
       attribution: activeBody.attribution,
-      crs: L.CRS.EPSG4326,
-      tileSize: 256,
+      maxZoom: activeBody.maxZoom,
+      tms: false,
       noWrap: true,
+      bounds: [
+        [-90, -180],
+        [90, 180],
+      ],
     }).addTo(map)
 
     let tileErrorShown = false
 
-    wmsLayer.on('tileerror', (event) => {
+    tileLayer.on('tileerror', (event) => {
       console.error('Tile load error', event)
       if (!tileErrorShown) {
         showToast(
@@ -177,7 +178,7 @@ function App() {
       where('celestialBody', '==', activeBody.name),
     )
 
-    const unsubscribe = onSnapshot(annotationsQuery, (snapshot) => {
+    const unsubscribeAnnotations = onSnapshot(annotationsQuery, (snapshot) => {
       markers.forEach((marker) => marker.remove())
       markers.length = 0
 
@@ -233,19 +234,13 @@ function App() {
     })
 
     return () => {
-      unsubscribe()
-      map.off()
-      map.remove()
+      unsubscribeAnnotations()
       markers.forEach((marker) => marker.remove())
       markers.length = 0
+      map.off()
+      map.remove()
     }
   }, [activeBody, showToast])
-
-  const switchBody = () => {
-    setActiveBody((current) =>
-      current.name === celestialBodies.mars.name ? celestialBodies.ceres : celestialBodies.mars,
-    )
-  }
 
   const handleSignIn = async () => {
     try {
@@ -269,103 +264,332 @@ function App() {
   }
 
   return (
-    <div
-      className="relative h-screen w-screen"
-      style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden' }}
-    >
-      <div
-        ref={mapContainerRef}
-        className="h-full w-full"
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-      />
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Top Navigation Bar */}
+      <header className="relative z-[1000] bg-slate-900/80 backdrop-blur-xl border-b border-white/10 shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-3">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
+              <div className="relative w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-2xl">🌌</span>
+              </div>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                UniExplorer
+              </h1>
+              <p className="text-xs text-slate-400">Planetary Exploration System</p>
+            </div>
+          </div>
 
-      <div
-        className="pointer-events-auto absolute top-4 right-4 z-[1000] flex w-72 flex-col gap-3 rounded-lg bg-slate-900/70 p-4 text-white shadow-lg backdrop-blur"
-        style={{
-          position: 'absolute',
-          top: '1rem',
-          right: '1rem',
-          width: '18rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          backgroundColor: 'rgba(15, 23, 42, 0.78)',
-          borderRadius: '0.75rem',
-          padding: '1rem',
-          color: '#fff',
-          boxShadow: '0 20px 45px rgba(15, 23, 42, 0.35)',
-          backdropFilter: 'blur(6px)',
-          pointerEvents: 'auto',
-          zIndex: 1000,
-        }}
-      >
-        <h1 className="text-xl font-semibold">UniExplorer</h1>
-        <p className="text-sm text-slate-300">Currently viewing: {activeBody.name}</p>
+          {/* Center Controls */}
+          <div className="flex items-center gap-6">
+            {/* Destination Selector */}
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="body-selector" className="text-xs font-semibold text-purple-300 uppercase tracking-wide">
+                Destination
+              </label>
+              <select
+                id="body-selector"
+                value={activeBody.name}
+                onChange={(e) => {
+                  const selected = Object.values(celestialBodies).find(
+                    (body) => body.name === e.target.value,
+                  )
+                  if (selected) setActiveBody(selected)
+                }}
+                className="px-4 py-2.5 bg-slate-800/50 backdrop-blur-sm border border-purple-500/30 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-pointer hover:border-purple-500/50"
+              >
+                {Object.values(celestialBodies).map((body) => (
+                  <option key={body.name} value={body.name}>
+                    {body.name === 'Mars' ? '🔴' : body.name === 'Moon' ? '🌙' : '☿'} {body.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {user ? (
-          <div className="space-y-2">
-            <p className="truncate text-sm">Welcome, {user.displayName ?? 'Explorer'}</p>
-            <button
-              onClick={handleSignOut}
-              className="w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
+            {/* Status Badge */}
+            <div className="hidden md:flex flex-col items-center gap-1 px-4 py-2 bg-slate-800/40 backdrop-blur-sm border border-white/10 rounded-lg">
+              <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Status</span>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium text-green-400">Active</span>
+              </div>
+            </div>
+          </div>
+
+          {/* User Section */}
+          <div className="flex items-center gap-3">
+            {user ? (
+              <>
+                <div className="hidden md:block text-right">
+                  <p className="text-sm font-semibold text-white">{user.displayName ?? 'Explorer'}</p>
+                  <p className="text-xs text-purple-300">Authenticated</p>
+                </div>
+                {user.photoURL && (
+                  <img 
+                    src={user.photoURL} 
+                    alt="Profile" 
+                    className="w-10 h-10 rounded-full border-2 border-purple-500 shadow-lg"
+                  />
+                )}
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-200 text-sm font-medium transition-all duration-200 hover:shadow-lg hover:shadow-red-500/20"
+                >
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={handleSignIn}
+                className="group relative px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg text-white font-semibold transition-all duration-200 hover:shadow-lg hover:shadow-purple-500/50 hover:scale-105"
+              >
+                <span className="relative z-10">Sign in with Google</span>
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-400 to-pink-400 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <div className="flex-1 relative overflow-hidden">
+        {/* Map Container */}
+        <div
+          ref={mapContainerRef}
+          className="absolute inset-0 w-full h-full"
+        />
+
+        {/* Left Sidebar - Mission Control */}
+        <aside className="absolute left-6 top-6 bottom-6 w-80 bg-slate-900/70 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[900] flex flex-col">
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-white/10 bg-gradient-to-br from-purple-600/20 to-pink-600/20">
+            <h2 className="text-lg font-bold text-white mb-1">Mission Control</h2>
+            <p className="text-xs text-slate-300">Exploration Dashboard</p>
+          </div>
+
+          {/* Current Body Info */}
+          <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-3xl shadow-lg">
+                  {activeBody.name === 'Mars' ? '🔴' : activeBody.name === 'Moon' ? '🌙' : '☿'}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-white">{activeBody.name}</h3>
+                  <p className="text-xs text-purple-300">Current Target</p>
+                </div>
+              </div>
+              
+              <div className="space-y-2 pt-3 border-t border-white/10">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Max Zoom:</span>
+                  <span className="text-white font-medium">{activeBody.maxZoom}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Projection:</span>
+                  <span className="text-white font-medium">EPSG:4326</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Interaction Status */}
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+              <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <span className={user ? 'text-green-400' : 'text-yellow-400'}>●</span>
+                Interaction Mode
+              </h3>
+              {user ? (
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      <strong className="text-white">Interactive Mode Active</strong><br />
+                      Click anywhere on the map to place discovery markers and document your findings.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <span className="text-yellow-400 mt-0.5">!</span>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      <strong className="text-white">View-Only Mode</strong><br />
+                      Sign in to unlock interactive features and collaborate with other explorers.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Features List */}
+            <div className="bg-gradient-to-br from-purple-600/10 to-pink-600/10 backdrop-blur-sm rounded-xl p-4 border border-purple-500/20">
+              <h3 className="text-sm font-semibold text-purple-300 mb-3 uppercase tracking-wide">Features</h3>
+              <ul className="space-y-2 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-400">▪</span>
+                  Real-time planetary imagery
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-400">▪</span>
+                  Collaborative annotations
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-400">▪</span>
+                  Multi-body exploration
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-purple-400">▪</span>
+                  Cloud-synced discoveries
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t border-white/10 bg-slate-900/50">
+            <p className="text-[10px] text-slate-500 text-center">
+              Data: USGS Astrogeology • CartoCDN
+            </p>
+          </div>
+        </aside>
+
+        {/* Toast Notifications */}
+        <div className="absolute bottom-6 right-6 z-[1100] flex flex-col gap-3 max-w-md">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className="transform transition-all duration-300 ease-out"
+              style={{
+                animation: 'slideInRight 0.3s ease-out'
+              }}
             >
-              Sign Out
-            </button>
-            <p className="text-xs text-slate-400">Click anywhere on the map to add a discovery tag.</p>
-          </div>
-        ) : (
-          <button
-            onClick={handleSignIn}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
-          >
-            Sign in with Google
-          </button>
-        )}
-
-        <button
-          onClick={switchBody}
-          className="rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200"
-        >
-          Switch to {activeBody.name === 'Mars' ? 'Ceres' : 'Mars'}
-        </button>
+              <div className={`
+                flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl backdrop-blur-xl border
+                ${toast.type === 'error' 
+                  ? 'bg-red-500/90 border-red-400/50' 
+                  : 'bg-purple-600/90 border-purple-400/50'
+                }
+              `}>
+                <span className="text-2xl">
+                  {toast.type === 'error' ? '⚠️' : '✨'}
+                </span>
+                <span className="text-white font-medium text-sm flex-1">{toast.message}</span>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div
-        className="pointer-events-none absolute bottom-4 left-1/2 z-[1100] flex -translate-x-1/2 flex-col gap-2"
-        style={{
-          position: 'absolute',
-          bottom: '1.5rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.75rem',
-          alignItems: 'center',
-          zIndex: 1100,
-        }}
-      >
-        {toasts.map((toast) => (
-          <div
-            key={toast.id}
-            className={`min-w-[240px] rounded-md px-4 py-3 text-sm shadow-lg backdrop-blur ${toastClasses[toast.type]}`}
-            style={{
-              pointerEvents: 'auto',
-              minWidth: '240px',
-              borderRadius: '0.5rem',
-              padding: '0.75rem 1rem',
-              fontSize: '0.9rem',
-              color: '#fff',
-              boxShadow: '0 18px 38px rgba(15, 23, 42, 0.35)',
-              backdropFilter: 'blur(6px)',
-              backgroundColor:
-                toast.type === 'error' ? 'rgba(220, 38, 38, 0.85)' : 'rgba(30, 41, 59, 0.85)',
-              border: toast.type === 'error' ? '1px solid rgba(254, 226, 226, 0.6)' : '1px solid rgba(148, 163, 184, 0.6)',
-            }}
-          >
-            {toast.message}
-          </div>
-        ))}
-      </div>
+      {/* Global Styles */}
+      <style>{`
+        @keyframes slideInRight {
+          from {
+            transform: translateX(400px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        select {
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a78bfa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+          background-position: right 0.5rem center;
+          background-repeat: no-repeat;
+          background-size: 1.5em 1.5em;
+          padding-right: 2.5rem;
+          appearance: none;
+        }
+
+        select option {
+          background-color: #1e293b;
+          color: white;
+          padding: 0.5rem;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.3);
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: rgba(147, 51, 234, 0.5);
+          border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+          background: rgba(147, 51, 234, 0.7);
+        }
+
+        /* Leaflet controls styling */
+        .leaflet-control-zoom {
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          background: rgba(15, 23, 42, 0.8) !important;
+          backdrop-filter: blur(12px) !important;
+          border-radius: 0.5rem !important;
+          overflow: hidden;
+        }
+
+        .leaflet-control-zoom a {
+          background: transparent !important;
+          color: white !important;
+          border: none !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        }
+
+        .leaflet-control-zoom a:last-child {
+          border-bottom: none !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+          background: rgba(147, 51, 234, 0.3) !important;
+        }
+
+        .leaflet-control-scale {
+          background: rgba(15, 23, 42, 0.8) !important;
+          backdrop-filter: blur(12px) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          border-radius: 0.375rem !important;
+          color: white !important;
+        }
+
+        .leaflet-control-scale-line {
+          border: 2px solid rgba(147, 51, 234, 0.5) !important;
+          border-top: none !important;
+          color: white !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+          background: rgba(15, 23, 42, 0.95) !important;
+          backdrop-filter: blur(12px) !important;
+          border: 1px solid rgba(147, 51, 234, 0.3) !important;
+          border-radius: 0.75rem !important;
+          color: white !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        .leaflet-popup-tip {
+          background: rgba(15, 23, 42, 0.95) !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button {
+          color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .leaflet-container a.leaflet-popup-close-button:hover {
+          color: white !important;
+        }
+      `}</style>
     </div>
   )
 }

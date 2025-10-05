@@ -15,7 +15,7 @@ import {
 
 type LeafletModule = typeof import('leaflet')
 
-type CelestialBodyKey = 'mars' | 'moon'
+type CelestialBodyKey = 'mars' | 'ceres'
 
 interface CelestialBody {
   name: string
@@ -55,12 +55,12 @@ const celestialBodies: Record<CelestialBodyKey, CelestialBody> = {
     attribution: 'USGS Astrogeology Science Center | Viking MDIM 2.1',
     maxZoom: 7,
   },
-  moon: {
-    name: 'Moon',
-    baseUrl: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/moon/moon_simp_cyl.map',
-    layerName: 'LRO_WAC_GLOBAL',
-    attribution: 'USGS Astrogeology Science Center | LRO WAC Mosaic',
-    maxZoom: 8,
+  ceres: {
+    name: 'Ceres',
+    baseUrl: '[https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/ceres/ceres_simp_cyl.map](https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/ceres/ceres_simp_cyl.map)',
+    layerName: 'Dawn_FC_HAMO_ClrShade_Global',
+    attribution: 'USGS Astrogeology Science Center | NASA Dawn',
+    maxZoom: 7,
   },
 }
 
@@ -72,10 +72,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null)
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
-  const mapInstanceRef = useRef<L.Map | null>(null)
-  const layerRef = useRef<L.TileLayer.WMS | null>(null)
-  const markersRef = useRef<L.Marker[]>([])
-  const activeBodyRef = useRef<CelestialBody>(activeBody)
   const toastTimeoutsRef = useRef<Map<number, number>>(new Map())
 
   const [toasts, setToasts] = useState<ToastMessage[]>([])
@@ -93,10 +89,6 @@ function App() {
   }, [])
 
   useEffect(() => {
-    activeBodyRef.current = activeBody
-  }, [activeBody])
-
-  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
     })
@@ -112,8 +104,14 @@ function App() {
 
   useEffect(() => {
     const L = (window as any).L as LeafletModule | undefined
-    if (!L || !mapContainerRef.current || mapInstanceRef.current) {
+    const container = mapContainerRef.current
+
+    if (!L || !container) {
       return
+    }
+
+    if (container.hasChildNodes()) {
+      container.replaceChildren()
     }
 
     delete (L.Icon.Default.prototype as any)._getIconUrl
@@ -123,9 +121,9 @@ function App() {
       shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
     })
 
-    const map = L.map(mapContainerRef.current, {
+    const map = L.map(container, {
       center: [0, 0],
-      zoom: 1,
+      zoom: 2,
       minZoom: 1,
       zoomControl: false,
       crs: L.CRS.EPSG4326,
@@ -137,71 +135,14 @@ function App() {
       [-90, -180],
       [90, 180],
     ])
-    map.fitBounds([
-      [-90, -180],
-      [90, 180],
-    ])
+    map.setMaxZoom(activeBody.maxZoom)
 
     L.control.zoom({ position: 'topleft' }).addTo(map)
     L.control.scale({ position: 'bottomleft' }).addTo(map)
 
-    map.on('click', async (event: L.LeafletMouseEvent) => {
-      if (!auth.currentUser) {
-        showToast('Please sign in to add a discovery tag.', 'info')
-        return
-      }
+    const markers: L.Marker[] = []
 
-      const description = window.prompt('Describe your discovery:')?.trim()
-      if (!description) {
-        return
-      }
-
-      const currentBody = activeBodyRef.current
-
-      try {
-        await addDoc(collection(db, 'annotations'), {
-          lat: event.latlng.lat,
-          lng: event.latlng.lng,
-          text: description,
-          author: auth.currentUser.displayName ?? 'Anonymous',
-          celestialBody: currentBody.name,
-          userId: auth.currentUser.uid,
-          createdAt: serverTimestamp(),
-        })
-        showToast('Discovery tag added!', 'info')
-      } catch (error) {
-        console.error('Failed to save annotation', error)
-        showToast('Unable to save your discovery right now. Please try again.', 'error')
-      }
-    })
-
-    mapInstanceRef.current = map
-
-    return () => {
-      map.off()
-      map.remove()
-      mapInstanceRef.current = null
-      layerRef.current = null
-      markersRef.current.forEach((marker) => marker.remove())
-      markersRef.current = []
-    }
-  }, [])
-
-  useEffect(() => {
-    const L = (window as any).L as LeafletModule | undefined
-    const map = mapInstanceRef.current
-    if (!L || !map) {
-      return
-    }
-
-    if (layerRef.current) {
-      map.removeLayer(layerRef.current)
-      layerRef.current = null
-    }
-
-    map.setMaxZoom(activeBody.maxZoom)
-
-    const newLayer = L.tileLayer.wms(activeBody.baseUrl, {
+    const wmsLayer = L.tileLayer.wms(activeBody.baseUrl, {
       layers: activeBody.layerName,
       format: 'image/jpeg',
       transparent: false,
@@ -209,38 +150,36 @@ function App() {
       crs: L.CRS.EPSG4326,
       tileSize: 256,
       noWrap: true,
-    })
+    }).addTo(map)
 
-    newLayer.on('tileerror', (event) => {
+    let tileErrorShown = false
+
+    wmsLayer.on('tileerror', (event) => {
       console.error('Tile load error', event)
+      if (!tileErrorShown) {
+        showToast(
+          `Tile load error for ${activeBody.name}. The imagery service may be temporarily unavailable.`,
+          'error',
+        )
+        tileErrorShown = true
+      }
     })
-
-    newLayer.addTo(map)
-    layerRef.current = newLayer
 
     map.fitBounds([
       [-90, -180],
       [90, 180],
     ])
-
-    // --- FIX FOR MAP SWITCHING ---
-    // Recenter the map and force it to recalculate its size
     map.setView([0, 0], 2)
     window.setTimeout(() => map.invalidateSize(), 100)
-  }, [activeBody])
 
-  useEffect(() => {
-    const L = (window as any).L as LeafletModule | undefined
-    const map = mapInstanceRef.current
-    if (!L || !map) {
-      return () => {}
-    }
+    const annotationsQuery = query(
+      collection(db, 'annotations'),
+      where('celestialBody', '==', activeBody.name),
+    )
 
-    const q = query(collection(db, 'annotations'), where('celestialBody', '==', activeBody.name))
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      markersRef.current.forEach((marker) => marker.remove())
-      markersRef.current = []
+    const unsubscribe = onSnapshot(annotationsQuery, (snapshot) => {
+      markers.forEach((marker) => marker.remove())
+      markers.length = 0
 
       snapshot.forEach((doc) => {
         const data = doc.data()
@@ -257,28 +196,54 @@ function App() {
           celestialBody: data.celestialBody ?? activeBody.name,
         }
 
-        if (annotation.celestialBody !== activeBody.name) {
-          return
-        }
-
         const marker = L.marker([annotation.lat, annotation.lng])
           .addTo(map)
           .bindPopup(`<strong>${annotation.text}</strong><br/>— ${annotation.author}`)
 
-        markersRef.current.push(marker)
+        markers.push(marker)
       })
+    })
+
+    map.on('click', async (event: L.LeafletMouseEvent) => {
+      if (!auth.currentUser) {
+        showToast('Please sign in to add a discovery tag.', 'info')
+        return
+      }
+
+      const description = window.prompt('Describe your discovery:')?.trim()
+      if (!description) {
+        return
+      }
+
+      try {
+        await addDoc(collection(db, 'annotations'), {
+          lat: event.latlng.lat,
+          lng: event.latlng.lng,
+          text: description,
+          author: auth.currentUser.displayName ?? 'Anonymous',
+          celestialBody: activeBody.name,
+          userId: auth.currentUser.uid,
+          createdAt: serverTimestamp(),
+        })
+        showToast('Discovery tag added!', 'info')
+      } catch (error) {
+        console.error('Failed to save annotation', error)
+        showToast('Unable to save your discovery right now. Please try again.', 'error')
+      }
     })
 
     return () => {
       unsubscribe()
-      markersRef.current.forEach((marker) => marker.remove())
-      markersRef.current = []
+      map.off()
+      map.remove()
+      markers.forEach((marker) => marker.remove())
+      markers.length = 0
     }
-  }, [activeBody])
+  }, [activeBody, showToast])
 
   const switchBody = () => {
     setActiveBody((current) =>
-      current.name === celestialBodies.mars.name ? celestialBodies.moon : celestialBodies.mars,
+      current.name === celestialBodies.mars.name ? celestialBodies.ceres : celestialBodies.mars,
     )
   }
 
@@ -361,7 +326,7 @@ function App() {
           onClick={switchBody}
           className="rounded-md bg-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-orange-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-200"
         >
-          Switch to {activeBody.name === 'Mars' ? 'Moon' : 'Mars'}
+          Switch to {activeBody.name === 'Mars' ? 'Ceres' : 'Mars'}
         </button>
       </div>
 

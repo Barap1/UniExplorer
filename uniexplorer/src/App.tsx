@@ -222,6 +222,11 @@ function App() {
       [-90, -180],
       [90, 180],
     ])
+
+    // --- FIX FOR MAP SWITCHING ---
+    // Recenter the map and force it to recalculate its size
+    map.setView([0, 0], 2)
+    window.setTimeout(() => map.invalidateSize(), 100)
   }, [activeBody])
 
   useEffect(() => {

@@ -69,6 +69,7 @@ function App() {
   const [annotationDetails, setAnnotationDetails] = useState('')
   const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [leaderboardData, setLeaderboardData] = useState<Array<{ author: string; count: number }>>([])
+  const [stats, setStats] = useState({ totalDiscoveries: 0, totalExplorers: 0, yourRank: 0 })
   
   const mapContainerRef = useRef<HTMLDivElement | null>(null)
 
@@ -82,6 +83,36 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, setUser)
     return unsubscribe
   }, [])
+
+  // Load initial stats
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'annotations'))
+        const counts: Record<string, number> = {}
+        
+        snapshot.forEach((doc) => {
+          const author = doc.data().author ?? 'Anonymous'
+          counts[author] = (counts[author] || 0) + 1
+        })
+
+        const totalDiscoveries = snapshot.size
+        const totalExplorers = Object.keys(counts).length
+        const currentUserName = user?.displayName ?? user?.email ?? 'Unknown'
+        const yourRank = user ? Object.entries(counts)
+          .sort(([, a], [, b]) => (b as number) - (a as number))
+          .findIndex(([author]) => author === currentUserName) + 1 : 0
+        
+        setStats({ totalDiscoveries, totalExplorers, yourRank })
+      } catch (error) {
+        console.error('Failed to load stats', error)
+      }
+    }
+    
+    loadStats()
+    const interval = setInterval(loadStats, 30000) // Refresh every 30 seconds
+    return () => clearInterval(interval)
+  }, [user])
 
   // Map initialization
   useEffect(() => {
@@ -166,12 +197,14 @@ function App() {
           html: `<div style="
             width: 24px;
             height: 24px;
-            background: ${isMyAnnotation ? '#fbbf24' : '#3b82f6'};
+            background: ${isMyAnnotation ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #3b82f6, #2563eb)'};
             border: 3px solid white;
             border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 0 ${isMyAnnotation ? 'rgba(251, 191, 36, 0.6)' : 'rgba(59, 130, 246, 0.6)'};
             cursor: pointer;
-          "></div>`,
+            animation: marker-pulse 2s infinite ease-in-out;
+            transition: all 0.3s ease;
+          " onmouseover="this.style.transform='scale(1.3)'" onmouseout="this.style.transform='scale(1)'"></div>`,
           iconSize: [24, 24],
           iconAnchor: [12, 12],
         })
@@ -245,13 +278,43 @@ function App() {
         userId: auth.currentUser?.uid,
         createdAt: serverTimestamp(),
       })
-      showToast('Discovery added!')
+      showToast('🎉 Discovery added! +1 to your count!')
+      
+      // Trigger confetti effect
+      createConfetti()
+      
       setNewAnnotationPos(null)
       setAnnotationTitle('')
       setAnnotationDetails('')
     } catch (error) {
       console.error('Failed to save annotation', error)
       showToast('Failed to save discovery')
+    }
+  }
+
+  const createConfetti = () => {
+    const colors = ['#fbbf24', '#3b82f6', '#a855f7', '#ec4899', '#10b981']
+    const confettiCount = 50
+    
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div')
+      confetti.style.cssText = `
+        position: fixed;
+        width: ${Math.random() * 10 + 5}px;
+        height: ${Math.random() * 10 + 5}px;
+        background: ${colors[Math.floor(Math.random() * colors.length)]};
+        top: 50%;
+        left: 50%;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+        pointer-events: none;
+        z-index: 9999;
+        animation: confetti-fall ${Math.random() * 3 + 2}s ease-out forwards;
+        transform: translate(-50%, -50%) rotate(${Math.random() * 360}deg);
+        opacity: 1;
+      `
+      document.body.appendChild(confetti)
+      
+      setTimeout(() => confetti.remove(), 5000)
     }
   }
 
@@ -271,6 +334,16 @@ function App() {
         .slice(0, 10)
 
       setLeaderboardData(sorted)
+      
+      // Calculate stats
+      const totalDiscoveries = snapshot.size
+      const totalExplorers = Object.keys(counts).length
+      const currentUserName = user?.displayName ?? user?.email ?? 'Unknown'
+      const yourRank = Object.entries(counts)
+        .sort(([, a], [, b]) => (b as number) - (a as number))
+        .findIndex(([author]) => author === currentUserName) + 1
+      
+      setStats({ totalDiscoveries, totalExplorers, yourRank })
       setShowLeaderboard(true)
     } catch (error) {
       console.error('Failed to load leaderboard', error)
@@ -279,7 +352,52 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(to bottom right, #0f172a, #581c87, #0f172a)' }}>
+    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(to bottom right, #0f172a, #581c87, #0f172a)', position: 'relative', overflow: 'hidden' }}>
+      {/* Animated Starfield Background */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+        zIndex: 0
+      }}>
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              width: Math.random() * 3 + 'px',
+              height: Math.random() * 3 + 'px',
+              background: 'white',
+              borderRadius: '50%',
+              top: Math.random() * 100 + '%',
+              left: Math.random() * 100 + '%',
+              animation: `twinkle ${Math.random() * 3 + 2}s infinite ease-in-out`,
+              opacity: Math.random() * 0.7 + 0.3,
+              boxShadow: '0 0 ' + (Math.random() * 4 + 2) + 'px rgba(255, 255, 255, 0.8)'
+            }}
+          />
+        ))}
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={`shooting-${i}`}
+            style={{
+              position: 'absolute',
+              width: '2px',
+              height: '2px',
+              background: 'white',
+              borderRadius: '50%',
+              top: Math.random() * 50 + '%',
+              left: '-5%',
+              animation: `shooting-star ${Math.random() * 3 + 4}s infinite linear`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: '0 0 10px 2px rgba(255, 255, 255, 0.8)',
+              opacity: 0
+            }}
+          />
+        ))}
+      </div>
+
       {/* Sidebar */}
       <aside style={{ 
         width: '384px', 
@@ -289,7 +407,9 @@ function App() {
         boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
         display: 'flex',
         flexDirection: 'column',
-        color: 'white'
+        color: 'white',
+        position: 'relative',
+        zIndex: 10
       }}>
         {/* Header */}
         <div style={{ 
@@ -326,6 +446,67 @@ function App() {
               <p style={{ fontSize: '14px', color: '#e9d5ff', margin: 0 }}>Planetary Explorer</p>
             </div>
           </div>
+
+          {/* Quick Stats */}
+          {stats.totalDiscoveries > 0 && (
+            <div style={{ 
+              marginTop: '16px',
+              display: 'flex',
+              gap: '8px',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ 
+                flex: 1,
+                minWidth: '80px',
+                padding: '8px 12px',
+                background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.3), rgba(219, 39, 119, 0.3))',
+                borderRadius: '8px',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#e9d5ff' }}>
+                  {stats.totalDiscoveries}
+                </div>
+                <div style={{ fontSize: '10px', color: '#c084fc', textTransform: 'uppercase' }}>
+                  Discoveries
+                </div>
+              </div>
+              <div style={{ 
+                flex: 1,
+                minWidth: '80px',
+                padding: '8px 12px',
+                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(251, 191, 36, 0.3))',
+                borderRadius: '8px',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#fef3c7' }}>
+                  {stats.totalExplorers}
+                </div>
+                <div style={{ fontSize: '10px', color: '#fbbf24', textTransform: 'uppercase' }}>
+                  Explorers
+                </div>
+              </div>
+              {user && stats.yourRank > 0 && (
+                <div style={{ 
+                  flex: 1,
+                  minWidth: '80px',
+                  padding: '8px 12px',
+                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(22, 163, 74, 0.3))',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#d1fae5' }}>
+                    #{stats.yourRank}
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#4ade80', textTransform: 'uppercase' }}>
+                    Your Rank
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Auth */}
           {user ? (
@@ -1340,6 +1521,47 @@ function App() {
 
         .animate-slide-in {
           animation: slide-in 0.3s ease-out;
+        }
+
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.3; transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes shooting-star {
+          0% {
+            transform: translateX(0) translateY(0);
+            opacity: 1;
+          }
+          70% {
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(300px) translateY(300px);
+            opacity: 0;
+          }
+        }
+
+        @keyframes marker-pulse {
+          0%, 100% {
+            transform: scale(1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          }
+          50% {
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px rgba(168, 85, 247, 0.6);
+          }
+        }
+
+        @keyframes confetti-fall {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translate(${Math.random() * 400 - 200}px, ${Math.random() * 600 + 300}px) rotate(${Math.random() * 720}deg);
+            opacity: 0;
+          }
         }
 
         /* Leaflet controls */

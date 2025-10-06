@@ -837,6 +837,36 @@ function App() {
           ref={mapContainerRef}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
         />
+        
+        {/* Login Banner (shown when not authenticated) */}
+        {!user && (
+          <div style={{
+            position: 'absolute',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+            padding: '16px 32px',
+            background: 'linear-gradient(to right, rgba(147, 51, 234, 0.95), rgba(219, 39, 119, 0.95))',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '12px',
+            border: '2px solid rgba(255, 255, 255, 0.3)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            animation: 'bounce-in 0.5s ease-out'
+          }}>
+            <span style={{ fontSize: '24px' }}>🔒</span>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: 'white'
+            }}>
+              Sign in to add annotations and explore collaboratively!
+            </span>
+          </div>
+        )}
       </main>
 
       {/* Toast */}
@@ -1492,6 +1522,23 @@ function App() {
       )}
 
       <style>{`
+        @keyframes bounce-in {
+          0% {
+            transform: translateX(-50%) translateY(-100px);
+            opacity: 0;
+          }
+          60% {
+            transform: translateX(-50%) translateY(10px);
+            opacity: 1;
+          }
+          80% {
+            transform: translateX(-50%) translateY(-5px);
+          }
+          100% {
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+
         @keyframes fade-in {
           from { opacity: 0; }
           to { opacity: 1; }

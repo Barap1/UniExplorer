@@ -15,7 +15,7 @@ import { celestialBodies } from './constants';
 import type { Annotation, CelestialBody, LeaderboardItem } from './types';
 
 // UI components
-import { Toast } from './components/ui';
+import { Toast, Spinner } from './components/ui';
 
 // Feature components
 import { TopoBg } from './components/TopoBg';
@@ -54,7 +54,7 @@ function App() {
     setToast('');
   }, []);
 
-  const { user, signIn, signOut } = useAuth(showToast);
+  const { user, loading, signIn, signOut } = useAuth(showToast);
 
   // Load leaderboard & stats
   useEffect(() => {
@@ -89,6 +89,15 @@ function App() {
     const interval = setInterval(loadStatsAndLeaderboard, 30000);
     return () => clearInterval(interval);
   }, [user]);
+
+  if (loading) {
+    return (
+      <div className="loading-screen animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--color-background)', gap: '16px' }}>
+        <Spinner size="lg" />
+        <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)', fontSize: '1.25rem', letterSpacing: '0.02em' }}>Initializing Scan Data...</span>
+      </div>
+    );
+  }
 
   // Map initialization
   useEffect(() => {

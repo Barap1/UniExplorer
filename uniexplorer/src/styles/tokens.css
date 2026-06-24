@@ -1,0 +1,36 @@
+:root {
+  --color-primary: #15803D;
+  --color-on-primary: #FFFFFF;
+  --color-secondary: #059669;
+  --color-accent: #C2410C;
+  --color-accent-warm: #D97706;
+  --color-background: #FEFCF3;
+  --color-surface: #FFFFFF;
+  --color-foreground: #1C1917;
+  --color-muted: #F5F0EB;
+  --color-muted-fg: #78716C;
+  --color-border: #E7E0D8;
+  --color-sand: #F5E6D3;
+  --color-destructive: #DC2626;
+
+  /* Typography */
+  --font-heading: 'DM Serif Display', serif;
+  --font-body: 'Nunito', sans-serif;
+
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Shadow & border radius */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-organic: 0 10px 25px -5px rgba(21, 128, 61, 0.05), 0 8px 10px -6px rgba(194, 65, 12, 0.05);
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+}

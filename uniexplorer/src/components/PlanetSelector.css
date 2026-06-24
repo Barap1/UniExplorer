@@ -1,0 +1,50 @@
+.planet-selector-container {
+  position: fixed;
+  top: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  pointer-events: none;
+}
+
+.planet-selector-pills {
+  display: flex;
+  background-color: rgba(254, 252, 243, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px;
+  gap: 4px;
+  box-shadow: var(--shadow-organic);
+  pointer-events: auto;
+}
+
+.planet-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--color-foreground);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.planet-pill:hover:not(.planet-pill-active) {
+  background-color: var(--color-muted);
+}
+
+.planet-pill-active {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-border);
+}
+
+.planet-icon {
+  transition: all var(--transition-normal);
+}

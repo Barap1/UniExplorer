@@ -1,0 +1,11 @@
+.spinner-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.spinner-icon {
+  color: var(--color-primary);
+  transform-origin: center;
+}

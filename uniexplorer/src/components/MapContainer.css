@@ -1,0 +1,23 @@
+.map-fullbleed-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.map-element {
+  width: 100%;
+  height: 100%;
+}
+
+.custom-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-surface);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-fast);
+}

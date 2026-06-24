@@ -1,0 +1,93 @@
+/* gentle slide up and fade in */
+@keyframes gentle-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-gentle-rise {
+  animation: gentle-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* subtle, organic sway movement */
+@keyframes leaf-sway {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.animate-leaf-sway {
+  animation: leaf-sway 6s ease-in-out infinite;
+}
+
+/* transition for topographic terrain lines */
+@keyframes terrain-fade {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 200;
+  }
+  to {
+    opacity: 0.15;
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-terrain-fade {
+  animation: terrain-fade 3s ease-out forwards;
+}
+
+/* natural pulsing effect for markers */
+@keyframes soft-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(21, 128, 61, 0.4);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(21, 128, 61, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(21, 128, 61, 0);
+  }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* compass spin for loader */
+@keyframes compass-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-compass-spin {
+  animation: compass-spin 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* simple fade in */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

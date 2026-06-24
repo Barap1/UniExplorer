@@ -1,0 +1,44 @@
+.signin-banner-container {
+  position: fixed;
+  bottom: 84px;
+  left: 20px;
+  z-index: 998;
+  width: 220px;
+}
+
+.signin-banner-card {
+  box-shadow: var(--shadow-lg) !important;
+  padding: 12px !important;
+  background-color: var(--color-surface) !important;
+}
+
+.signin-banner-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--color-primary);
+  margin: 0 0 4px 0;
+}
+
+.signin-banner-text {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--color-muted-fg);
+  line-height: 1.35;
+  margin: 0 0 10px 0;
+}
+
+.signin-banner-btn {
+  width: 100%;
+  gap: 6px !important;
+  font-size: 0.8rem !important;
+  padding: 8px 12px !important;
+}
+
+@media (max-width: 640px) {
+  .signin-banner-container {
+    left: 12px;
+    right: 12px;
+    width: auto;
+    bottom: 76px;
+  }
+}

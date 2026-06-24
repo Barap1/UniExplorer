@@ -1,0 +1,9 @@
+{
+  "name": "uniexplorer-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "install-deps": "npm install --prefix uniexplorer",
+    "build": "npm run build --prefix uniexplorer"
+  }
+}

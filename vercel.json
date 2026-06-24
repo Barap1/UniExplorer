@@ -1,0 +1,12 @@
+{
+  "installCommand": "npm install --prefix uniexplorer",
+  "buildCommand": "npm run build --prefix uniexplorer",
+  "outputDirectory": "uniexplorer/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

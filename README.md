@@ -2,7 +2,7 @@
 
 Planetary terrain exploration and collaborative mapping.
 
-NASA Space Apps Challenge - Global Nominee (Top 7% of 18,000 teams)
+**NASA Space Apps Challenge - Global Nominee (Top 7% of 18,000 teams)**
 
 ## Overview
 

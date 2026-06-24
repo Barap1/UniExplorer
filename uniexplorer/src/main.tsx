@@ -8,6 +8,7 @@ import './styles/animations.css'
 import './styles/utilities.css'
 import './styles/leaflet.css'
 import './styles/responsive.css'
+import './styles/accessibility.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

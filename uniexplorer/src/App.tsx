@@ -90,14 +90,7 @@ function App() {
     return () => clearInterval(interval);
   }, [user]);
 
-  if (loading) {
-    return (
-      <div className="loading-screen animate-fade-in" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: 'var(--color-background)', gap: '16px' }}>
-        <Spinner size="lg" />
-        <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)', fontSize: '1.25rem', letterSpacing: '0.02em' }}>Initializing Scan Data...</span>
-      </div>
-    );
-  }
+
 
   // Map initialization
   useEffect(() => {
@@ -285,7 +278,7 @@ function App() {
         activeBodyName={activeBody.name}
       />
 
-      {!user && <SignInBanner onSignIn={signIn} />}
+      {!user && !loading && <SignInBanner onSignIn={signIn} />}
 
       {newAnnotationPos && (
         <AnnotationForm
@@ -318,6 +311,13 @@ function App() {
           message={toast}
           onClose={handleCloseToast}
         />
+      )}
+
+      {loading && (
+        <div className="loading-screen animate-fade-in" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--color-background)', zIndex: 9999, gap: '16px' }}>
+          <Spinner size="lg" />
+          <span style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-primary)', fontSize: '1.25rem', letterSpacing: '0.02em' }}>Initializing Scan Data...</span>
+        </div>
       )}
     </div>
   );

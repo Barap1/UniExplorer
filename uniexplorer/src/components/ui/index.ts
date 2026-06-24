@@ -11,3 +11,4 @@ export * from './Tooltip';
 export * from './Dropdown';
 export * from './Progress';
 export * from './Stat';
+export * from './Skeleton';

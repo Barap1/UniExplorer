@@ -10,6 +10,7 @@ import './styles/leaflet.css'
 import './styles/responsive.css'
 import './styles/accessibility.css'
 import './styles/reduced-motion.css'
+import './styles/scrollbar-selection.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

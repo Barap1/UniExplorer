@@ -11,6 +11,7 @@ import './styles/responsive.css'
 import './styles/accessibility.css'
 import './styles/reduced-motion.css'
 import './styles/scrollbar-selection.css'
+import './styles/micro-interactions.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(

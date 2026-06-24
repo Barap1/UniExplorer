@@ -70,3 +70,19 @@
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: var(--color-foreground) !important;
 }
+
+/* Offset Leaflet control positions to avoid overlap with top CommandBar and bottom StatsBar */
+.leaflet-top.leaflet-left {
+  top: 80px !important;
+  left: 20px !important;
+}
+
+.leaflet-bottom.leaflet-left {
+  bottom: 120px !important;
+  left: 20px !important;
+}
+
+.leaflet-bottom.leaflet-right {
+  bottom: 120px !important;
+  right: 20px !important;
+}

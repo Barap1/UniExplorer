@@ -34,7 +34,7 @@ import { LeaderboardModal } from './components/LeaderboardModal';
 type LeafletModule = typeof import('leaflet');
 
 function App() {
-  const [activeBody, setActiveBody] = useState<CelestialBody>(celestialBodies.mars);
+  const [activeBody, setActiveBody] = useState<CelestialBody>(celestialBodies.moon);
   const [toast, setToast] = useState<string>('');
   const [selectedAnnotation, setSelectedAnnotation] = useState<Annotation | null>(null);
   const [showOnlyMyAnnotations, setShowOnlyMyAnnotations] = useState(false);
@@ -206,6 +206,7 @@ function App() {
     });
 
     map.fitBounds([[-90, -180], [90, 180]]);
+    map.zoomIn(1);
     setTimeout(() => map.invalidateSize(), 100);
 
     return () => {

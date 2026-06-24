@@ -1,6 +1,6 @@
 .map-overlay-container {
   position: fixed;
-  bottom: 84px;
+  bottom: 156px;
   right: 20px;
   z-index: 998;
   display: flex;

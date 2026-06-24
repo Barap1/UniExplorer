@@ -1,29 +1,30 @@
-# UniExplorer — Planetary Terrain Explorer
+# UniExplorer
 
-A collaborative mapping application for exploring the terrains of Mars, the Moon, and Mercury. 
+Planetary terrain exploration and collaborative mapping.
 
-## Biophilic Design System
+NASA Space Apps Challenge - Global Nominee (Top 7% of 18,000 teams)
 
-UniExplorer features a complete, organic biophilic design overhaul designed to feel like a high-tech science exploration dashboard:
-- **Earthy Palette**: Warm cream backgrounds (`#FEFCF3`), forest green accents (`#15803D`), sand decorative highlight tones (`#F5E6D3`), and terracotta CTA accents (`#C2410C`).
-- **Typography**: DM Serif Display for elegant, vintage scientific headings and Nunito for friendly, rounded body copy.
-- **Topographic contours**: Dynamic, subtle HTML5 canvas-rendered contour waves flowing in the background instead of standard dark space backgrounds.
-- **Floating Overlays**: Full-bleed responsive mapping viewport with custom Leaflet controls matched to biophilic styles, overlaid with floating statistics, live coordinate scanners, and active filter controllers.
-- **Modular Architecture**: 15+ standalone custom components using vanilla CSS custom properties.
+## Overview
 
-## Redesign Features
+UniExplorer is an interactive web application that allows users to explore, annotate, and collaborate on planetary surfaces, including Mars, the Moon, and Mercury. 
 
-1. **Top Command Bar**: Clean, structured biophilic header wrapping Google Authentication and rank achievements.
-2. **Horizontal Planet Selector**: Pill-shaped selector with terrain-coded active buttons.
-3. **Observation Form**: Dialog to log new geologic coordinates with detailed notes.
-4. **Discovery Detail Panel**: Detail card showing coordinate data and observer metadata.
-5. **Interactive Leaderboard**: Rankings calculated based on global annotations.
-6. **Toast & Skeleton primitives**: Animated toasts and skeletal templates for visual polish.
+## How It Works
 
-## Installation & Setup
+- Interactive Maps: Select a celestial body to view high-resolution satellite and elevation maps of its surface.
+- Coordinate Logging: Click anywhere on the map surface to log geological discoveries, coordinates, and notes.
+- Collaboration: Sign in with a Google account to persist observations and tag them to your explorer profile.
+- Leaderboard and Stats: Track active exploration data and see global rankings based on logged discoveries.
 
-```bash
-cd uniexplorer
-npm install
-npm run dev
-```
+## Getting Started
+
+To run the project locally:
+
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```

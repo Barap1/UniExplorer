@@ -1,0 +1,29 @@
+.stats-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 997;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  pointer-events: none;
+}
+
+.stats-bar-item {
+  pointer-events: auto;
+  background-color: rgba(254, 252, 243, 0.9) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-organic) !important;
+}
+
+@media (max-width: 640px) {
+  .stats-bar {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+  }
+}

@@ -1,0 +1,102 @@
+.leaderboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.leaderboard-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--color-muted-fg);
+  margin: 0 0 2px 0;
+  line-height: 1.4;
+}
+
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.leaderboard-empty {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-muted-fg);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+}
+
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  transition: all var(--transition-fast);
+}
+
+.leaderboard-item:hover {
+  border-color: var(--color-primary);
+  transform: translateX(2px);
+}
+
+.leaderboard-item-self {
+  background-color: rgba(21, 128, 61, 0.04);
+  border-color: rgba(21, 128, 61, 0.25);
+}
+
+.item-rank-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.rank-number {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  color: var(--color-muted-fg);
+  font-size: 0.85rem;
+}
+
+.gold-medal { color: var(--color-accent-warm); fill: rgba(217, 119, 6, 0.1); }
+.silver-medal { color: #94A3B8; fill: rgba(148, 163, 184, 0.1); }
+.bronze-medal { color: var(--color-accent); fill: rgba(194, 65, 12, 0.1); }
+
+.item-user-section {
+  flex: 1;
+  padding-left: 10px;
+  min-width: 0;
+}
+
+.user-name {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.self-label {
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.item-score-section {
+  flex-shrink: 0;
+}
+
+.score-badge {
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}

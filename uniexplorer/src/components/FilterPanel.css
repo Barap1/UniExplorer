@@ -1,0 +1,45 @@
+.filter-panel-container {
+  position: fixed;
+  top: 124px;
+  right: 20px;
+  z-index: 998;
+  width: 180px;
+}
+
+.filter-panel-card {
+  box-shadow: var(--shadow-organic) !important;
+  padding: 10px 12px !important;
+  border-radius: var(--radius-md) !important;
+}
+
+.filter-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 4px;
+}
+
+.filter-icon {
+  color: var(--color-primary);
+}
+
+.filter-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-disclaimer {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  color: var(--color-muted-fg);
+  line-height: 1.2;
+}

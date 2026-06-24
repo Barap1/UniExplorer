@@ -8,6 +8,8 @@ NASA Space Apps Challenge - Global Nominee (Top 7% of 18,000 teams)
 
 UniExplorer is an interactive web application that allows users to explore, annotate, and collaborate on planetary surfaces, including Mars, the Moon, and Mercury. 
 
+#### Demo: uniexplorer.vercel.app
+
 ## How It Works
 
 - Interactive Maps: Select a celestial body to view high-resolution satellite and elevation maps of its surface.

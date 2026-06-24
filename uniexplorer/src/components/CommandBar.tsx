@@ -1,4 +1,3 @@
-import React from 'react';
 import { Leaf, Trophy } from './Icons';
 import { Button, Avatar } from './ui';
 import type { User } from 'firebase/auth';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Compass } from '../Icons';
 import './Spinner.css';
 

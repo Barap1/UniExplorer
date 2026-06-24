@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Switch } from './ui';
 import { Filter } from './Icons';
 import './FilterPanel.css';

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card } from './ui';
 import { Compass, Trophy, Pin, X } from './Icons';
 import './FeatureShowcase.css';

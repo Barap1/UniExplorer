@@ -1,4 +1,3 @@
-import React from 'react';
 import './MapOverlay.css';
 
 export interface MapOverlayProps {

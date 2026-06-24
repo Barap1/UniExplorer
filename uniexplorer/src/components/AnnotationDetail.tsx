@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal, Badge, Button } from './ui';
 import { User, Map } from './Icons';
 import './AnnotationDetail.css';

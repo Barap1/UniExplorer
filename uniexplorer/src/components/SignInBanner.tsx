@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Button } from './ui';
 import { GoogleIcon } from './Icons';
 import './SignInBanner.css';

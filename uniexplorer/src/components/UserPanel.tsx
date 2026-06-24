@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import { Button, Avatar, Card, CardHeader, CardTitle, CardContent, CardFooter } from './ui';
 import { User as UserIcon } from './Icons';

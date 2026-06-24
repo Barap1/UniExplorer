@@ -1,4 +1,4 @@
-import { CelestialBody } from './types';
+import type { CelestialBody } from './types';
 
 export const celestialBodies: Record<string, CelestialBody> = {
   mars: {

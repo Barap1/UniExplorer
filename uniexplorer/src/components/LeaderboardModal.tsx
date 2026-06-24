@@ -1,4 +1,3 @@
-import React from 'react';
 import { Modal, Badge } from './ui';
 import { Trophy } from './Icons';
 import './LeaderboardModal.css';

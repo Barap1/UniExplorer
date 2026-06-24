@@ -1,4 +1,3 @@
-import React from 'react';
 import './Progress.css';
 
 export interface ProgressProps {

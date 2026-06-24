@@ -1,4 +1,3 @@
-import React from 'react';
 import { Stat } from './ui';
 import { Eye, Trophy, User } from './Icons';
 import './StatsBar.css';
